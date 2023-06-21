@@ -53,6 +53,27 @@ exports.modifyBook = (req, res, next) => {
     });
 };
 
+exports.rateBook = (req, res, next) => {
+  Book.findOne({ _id: req.params.id })
+    .then((book) => {
+      if (book.userId === req.auth.userId) {
+        res.status(401).json({ message: "Déjà Noté" });
+      } else {
+        Book.updateOne(
+          { _id: req.params.id },
+          { $push: { ratings: req.body }, _id: req.params.id }
+        )
+          .then(() => res.status(200).json({ message: "note attribuée" }))
+          .catch((error) => {
+            res.status(401).json({ error });
+          });
+      }
+    })
+    .catch((error) => {
+      res.status(400).json({ error });
+    });
+};
+
 exports.deleteBook = (req, res, next) => {
   Book.findOne({ _id: req.params.id })
     .then((book) => {
