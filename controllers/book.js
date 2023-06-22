@@ -53,25 +53,80 @@ exports.modifyBook = (req, res, next) => {
     });
 };
 
+exports.testFonction = (req, res, next) => {
+  Book.find({ _id: req.params.id })
+    .then((thing) => {
+      let total = 0;
+      thing[0].ratings.forEach((current) => {
+        total += current.grade;
+      });
+      avgGrade = total / thing[0].ratings.length;
+      console.log(total);
+      console.log(thing[0].ratings.length);
+      console.log(avgGrade);
+    })
+    .catch((error) => console.log(error));
+
+  //   let total = 0;
+  //   Book.find({ _id: req.params.id })
+  //     .then((thing) => {
+  //       console.log(
+  //         thing[0].ratings.forEach((current) => {
+  //           total += current.grade;
+  //         })
+  //       );
+  //     })
+  //     .catch((error) => {
+  //       res.status(400).json({ error });
+  //     });
+  //   console.log(total);
+
+  //   , { "ratings.grade": true }
+};
+
 exports.rateBook = (req, res, next) => {
-  const data = { userId: req.body.userId, grade: req.body.rating };
-  Book.findOne({ _id: req.params.id })
-    .then((book) => {
-      Book.updateOne(
-        { _id: req.params.id },
-        { $push: { ratings: data }, _id: req.params.id }
-      )
-        .then(() =>
-          res.status(200).json({ message: "note attribuée", id: req.params.id })
-        )
+  const dataReq = {
+    id: req.params.id,
+    userId: req.body.userId,
+    grade: req.body.rating,
+  };
+  Book.updateOne(
+    { _id: req.params.id },
+    { $push: { ratings: dataReq }, _id: req.params.id }
+  )
+    .then(() => {
+      //   res.status(200).json({ message: "Note Attribuée" });
+      Book.find({ _id: req.params.id })
+        .then((thing) => {
+          let total = 0;
+          thing[0].ratings.forEach((current) => {
+            total += current.grade;
+          });
+          let avgGrade = total / thing[0].ratings.length;
+          //   console.log(total);
+          //   console.log(thing[0].ratings.length);
+          //   console.log(avgGrade);
+
+          Book.updateOne(
+            { _id: req.params.id },
+            { $set: { averageRating: avgGrade }, _id: req.params.id }
+          )
+            .then(() =>
+              res.status(200).json({ message: "Average Rating modifié" })
+            )
+            .catch((error) => {
+              res.status(400).json({ error });
+            });
+        })
         .catch((error) => {
-          res.status(401).json({ error });
+          res.status(400).json({ error });
         });
     })
     .catch((error) => {
       res.status(400).json({ error });
     });
-  console.log(data);
+
+  console.log(dataReq);
 };
 
 exports.deleteBook = (req, res, next) => {
