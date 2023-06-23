@@ -54,66 +54,42 @@ exports.modifyBook = (req, res, next) => {
 };
 
 exports.testFonction = (req, res, next) => {
-  Book.find({ _id: req.params.id })
-    .then((thing) => {
-      let total = 0;
-      thing[0].ratings.forEach((current) => {
-        total += current.grade;
-      });
-      avgGrade = total / thing[0].ratings.length;
-      console.log(total);
-      console.log(thing[0].ratings.length);
-      console.log(avgGrade);
-    })
-    .catch((error) => console.log(error));
-
-  //   let total = 0;
-  //   Book.find({ _id: req.params.id })
-  //     .then((thing) => {
-  //       console.log(
-  //         thing[0].ratings.forEach((current) => {
-  //           total += current.grade;
-  //         })
-  //       );
-  //     })
-  //     .catch((error) => {
-  //       res.status(400).json({ error });
-  //     });
-  //   console.log(total);
-
-  //   , { "ratings.grade": true }
-};
-
-exports.rateBook = (req, res, next) => {
   const dataReq = {
-    id: req.params.id,
+    // _id: req.params.id,
     userId: req.body.userId,
     grade: req.body.rating,
   };
-  Book.updateOne(
+  Book.findOneAndUpdate(
     { _id: req.params.id },
-    { $push: { ratings: dataReq }, _id: req.params.id }
+    { $push: { ratings: dataReq } },
+    { new: true }
   )
-    .then(() => {
-      //   res.status(200).json({ message: "Note Attribuée" });
+    .then((book) => {
+      // console.log(book);
       Book.find({ _id: req.params.id })
-        .then((thing) => {
+        .then((book) => {
           let total = 0;
-          thing[0].ratings.forEach((current) => {
+          book[0].ratings.forEach((current) => {
             total += current.grade;
           });
-          let avgGrade = total / thing[0].ratings.length;
+          let avgGrade = total / book[0].ratings.length;
           //   console.log(total);
           //   console.log(thing[0].ratings.length);
           //   console.log(avgGrade);
+          // console.log(book[0]);
 
           Book.updateOne(
             { _id: req.params.id },
-            { $set: { averageRating: avgGrade }, _id: req.params.id }
+            { averageRating: avgGrade },
+            { new: true }
           )
-            .then(() =>
-              res.status(200).json({ message: "Average Rating modifié" })
-            )
+            .then((result) => {
+              result._id = req.params.id;
+              console.log(book[0]);
+              console.log(result);
+
+              res.status(200).json(result);
+            })
             .catch((error) => {
               res.status(400).json({ error });
             });
@@ -125,8 +101,9 @@ exports.rateBook = (req, res, next) => {
     .catch((error) => {
       res.status(400).json({ error });
     });
+  // console.log(dataReq);
 
-  console.log(dataReq);
+  // res.status(200).json({ message: "Note ajoutée" })
 };
 
 exports.deleteBook = (req, res, next) => {
@@ -146,12 +123,49 @@ exports.deleteBook = (req, res, next) => {
     .catch((error) => res.status(500).json({ error }));
 };
 
-exports.bestRating = (req, res, next) => {
-  Book.find()
-    .sort({ averageRating: -1 })
-    .limit(3)
-    .then((books) => res.status(200).json(books))
-    .catch((error) => res.status(400).json({ error: error }));
+exports.rateBook = (req, res, next) => {
+  const dataReq = {
+    id: req.params.id,
+    userId: req.body.userId,
+    grade: req.body.rating,
+  };
+  Book.updateOne(
+    { _id: req.params.id },
+    { $push: { ratings: dataReq }, _id: req.params.id }
+  )
+    .then((book) => {
+      console.log(book);
+      Book.find({ _id: req.params.id })
+        .then((thing) => {
+          let total = 0;
+          thing[0].ratings.forEach((current) => {
+            total += current.grade;
+          });
+          let avgGrade = total / thing[0].ratings.length;
+          //   console.log(total);
+          //   console.log(thing[0].ratings.length);
+          //   console.log(avgGrade);
+          console.log(thing[0]._id);
+
+          Book.updateOne(
+            { _id: req.params.id },
+            { $set: { averageRating: avgGrade }, _id: req.params.id }
+          )
+            .then(() => res.status(200).json({ message: "Note ajoutée" }))
+            .catch((error) => {
+              res.status(400).json({ error });
+            });
+        })
+        .catch((error) => {
+          res.status(400).json({ error });
+        });
+    })
+    .catch((error) => {
+      res.status(400).json({ error });
+    });
+  // console.log(dataReq);
+
+  // res.status(200).json({ message: "Note ajoutée" })
 };
 
 exports.getOneBook = (req, res, next) => {
@@ -162,6 +176,14 @@ exports.getOneBook = (req, res, next) => {
 
 exports.getAllBooks = (req, res, next) => {
   Book.find()
+    .then((books) => res.status(200).json(books))
+    .catch((error) => res.status(400).json({ error: error }));
+};
+
+exports.bestRating = (req, res, next) => {
+  Book.find()
+    .sort({ averageRating: -1 })
+    .limit(3)
     .then((books) => res.status(200).json(books))
     .catch((error) => res.status(400).json({ error: error }));
 };
