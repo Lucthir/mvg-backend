@@ -78,7 +78,7 @@ exports.testFonction = (req, res, next) => {
           //   console.log(avgGrade);
           // console.log(book[0]);
 
-          Book.updateOne(
+          Book.findOneAndUpdate(
             { _id: req.params.id },
             { averageRating: avgGrade },
             { new: true }
@@ -125,33 +125,41 @@ exports.deleteBook = (req, res, next) => {
 
 exports.rateBook = (req, res, next) => {
   const dataReq = {
-    id: req.params.id,
+    // _id: req.params.id,
     userId: req.body.userId,
     grade: req.body.rating,
   };
-  Book.updateOne(
+  Book.findOneAndUpdate(
     { _id: req.params.id },
-    { $push: { ratings: dataReq }, _id: req.params.id }
+    { $push: { ratings: dataReq } },
+    { new: true }
   )
     .then((book) => {
-      console.log(book);
+      // console.log(book);
       Book.find({ _id: req.params.id })
-        .then((thing) => {
+        .then((book) => {
           let total = 0;
-          thing[0].ratings.forEach((current) => {
+          book[0].ratings.forEach((current) => {
             total += current.grade;
           });
-          let avgGrade = total / thing[0].ratings.length;
+          let avgGrade = total / book[0].ratings.length;
           //   console.log(total);
           //   console.log(thing[0].ratings.length);
           //   console.log(avgGrade);
-          console.log(thing[0]._id);
+          // console.log(book[0]);
 
-          Book.updateOne(
+          Book.findOneAndUpdate(
             { _id: req.params.id },
-            { $set: { averageRating: avgGrade }, _id: req.params.id }
+            { averageRating: avgGrade },
+            { new: true }
           )
-            .then(() => res.status(200).json({ message: "Note ajoutée" }))
+            .then((result) => {
+              result._id = req.params.id;
+              console.log(book[0]);
+              console.log(result);
+
+              res.status(200).json(result);
+            })
             .catch((error) => {
               res.status(400).json({ error });
             });
