@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
 const express = require("express");
 const path = require("path");
-
+require("dotenv").config();
 const bookRoutes = require("./routes/book");
 const userRoutes = require("./routes/user");
 
 mongoose
   .connect(
-    "mongodb+srv://test_user:yzWcT86ixHwZpQPU@mon-vieux-grimoire-data.ik0uyxp.mongodb.net/?retryWrites=true&w=majority",
+    `mongodb+srv://${process.env.USER_TEST}:${process.env.PASSWORD}@mon-vieux-grimoire-data.ik0uyxp.mongodb.net/?retryWrites=true&w=majority`,
     { useNewUrlParser: true, useUnifiedTopology: true }
   )
   .then(() => console.log("Connexion à MongoDB réussie !"))

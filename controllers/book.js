@@ -27,12 +27,14 @@ exports.modifyBook = (req, res, next) => {
   const bookObject = req.file
     ? {
         ...JSON.parse(req.body.book),
-        imageURL: `${req.protocol}://${req.get("host")}/images/${
+        imageUrl: `${req.protocol}://${req.get("host")}/images/${
           req.file.filename
         }`,
       }
     : { ...req.body };
+
   delete bookObject._userId;
+
   Book.findOne({ _id: req.params.id })
     .then((book) => {
       if (book.userId != req.auth.userId) {
@@ -142,10 +144,12 @@ exports.rateBook = (req, res, next) => {
           book[0].ratings.forEach((current) => {
             total += current.grade;
           });
-          let avgGrade = total / book[0].ratings.length;
+          let avgGrade = (total / book[0].ratings.length).toFixed(2);
+
           //   console.log(total);
           //   console.log(thing[0].ratings.length);
-          //   console.log(avgGrade);
+
+          console.log(avgGrade);
           // console.log(book[0]);
 
           Book.findOneAndUpdate(
