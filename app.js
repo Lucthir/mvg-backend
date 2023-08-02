@@ -35,5 +35,3 @@ app.use("/api/auth", userRoutes);
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 module.exports = app;
-
-//qx9EMsy6v05x3itZ

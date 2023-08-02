@@ -55,59 +55,6 @@ exports.modifyBook = (req, res, next) => {
     });
 };
 
-exports.testFonction = (req, res, next) => {
-  const dataReq = {
-    // _id: req.params.id,
-    userId: req.body.userId,
-    grade: req.body.rating,
-  };
-  Book.findOneAndUpdate(
-    { _id: req.params.id },
-    { $push: { ratings: dataReq } },
-    { new: true }
-  )
-    .then((book) => {
-      // console.log(book);
-      Book.find({ _id: req.params.id })
-        .then((book) => {
-          let total = 0;
-          book[0].ratings.forEach((current) => {
-            total += current.grade;
-          });
-          let avgGrade = total / book[0].ratings.length;
-          //   console.log(total);
-          //   console.log(thing[0].ratings.length);
-          //   console.log(avgGrade);
-          // console.log(book[0]);
-
-          Book.findOneAndUpdate(
-            { _id: req.params.id },
-            { averageRating: avgGrade },
-            { new: true }
-          )
-            .then((result) => {
-              result._id = req.params.id;
-              console.log(book[0]);
-              console.log(result);
-
-              res.status(200).json(result);
-            })
-            .catch((error) => {
-              res.status(400).json({ error });
-            });
-        })
-        .catch((error) => {
-          res.status(400).json({ error });
-        });
-    })
-    .catch((error) => {
-      res.status(400).json({ error });
-    });
-  // console.log(dataReq);
-
-  // res.status(200).json({ message: "Note ajoutée" })
-};
-
 exports.deleteBook = (req, res, next) => {
   Book.findOne({ _id: req.params.id })
     .then((book) => {
@@ -127,7 +74,6 @@ exports.deleteBook = (req, res, next) => {
 
 exports.rateBook = (req, res, next) => {
   const dataReq = {
-    // _id: req.params.id,
     userId: req.body.userId,
     grade: req.body.rating,
   };
@@ -137,7 +83,6 @@ exports.rateBook = (req, res, next) => {
     { new: true }
   )
     .then((book) => {
-      // console.log(book);
       Book.find({ _id: req.params.id })
         .then((book) => {
           let total = 0;
@@ -146,12 +91,6 @@ exports.rateBook = (req, res, next) => {
           });
           let avgGrade = (total / book[0].ratings.length).toFixed(2);
 
-          //   console.log(total);
-          //   console.log(thing[0].ratings.length);
-
-          console.log(avgGrade);
-          // console.log(book[0]);
-
           Book.findOneAndUpdate(
             { _id: req.params.id },
             { averageRating: avgGrade },
@@ -159,8 +98,6 @@ exports.rateBook = (req, res, next) => {
           )
             .then((result) => {
               result._id = req.params.id;
-              console.log(book[0]);
-              console.log(result);
 
               res.status(200).json(result);
             })
@@ -175,9 +112,6 @@ exports.rateBook = (req, res, next) => {
     .catch((error) => {
       res.status(400).json({ error });
     });
-  // console.log(dataReq);
-
-  // res.status(200).json({ message: "Note ajoutée" })
 };
 
 exports.getOneBook = (req, res, next) => {
